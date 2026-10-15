@@ -1,0 +1,10 @@
+document.addEventListener('DOMContentLoaded',()=>{
+  const form=document.getElementById('tripPlanner'); if(!form)return;
+  let step=1; const state={interests:[]};
+  const render=()=>{document.querySelectorAll('.planner-step').forEach(x=>x.classList.toggle('active',+x.dataset.step===step));document.querySelectorAll('[data-step-dot]').forEach(x=>x.classList.toggle('active',+x.dataset.stepDot<=step));document.getElementById('prevStep').disabled=step===1;document.getElementById('nextStep').classList.toggle('d-none',step===6);document.getElementById('generateBtn').classList.toggle('d-none',step!==6)};
+  document.querySelectorAll('.choice').forEach(btn=>btn.addEventListener('click',()=>{const name=btn.dataset.name,val=btn.dataset.value;if(btn.classList.contains('multi-choice')){btn.classList.toggle('selected');const i=state.interests.indexOf(val);if(i>=0)state.interests.splice(i,1);else state.interests.push(val)}else{state[name]=val;document.querySelectorAll(`.choice[data-name="${name}"]`).forEach(x=>x.classList.remove('selected'));btn.classList.add('selected')}}));
+  document.getElementById('nextStep').addEventListener('click',()=>{const needed={1:'days',2:'budget',3:'group',4:'interests',5:'transport'}[step];if(needed==='interests'&&!state.interests.length){BharatpurApp.toast('Choose at least one interest');return}if(needed!=='interests'&&!state[needed]){BharatpurApp.toast('Please choose an option');return}step++;render()});
+  document.getElementById('prevStep').addEventListener('click',()=>{if(step>1)step--;render()});
+  form.addEventListener('submit',e=>{const start=form.querySelector('[name=start]').value.trim();if(!start){e.preventDefault();BharatpurApp.toast('Add your starting location');return}const box=document.getElementById('hiddenFields');box.innerHTML='';Object.entries(state).forEach(([k,v])=>{if(Array.isArray(v))v.forEach(item=>box.insertAdjacentHTML('beforeend',`<input type="hidden" name="${k}[]" value="${item}">`));else box.insertAdjacentHTML('beforeend',`<input type="hidden" name="${k}" value="${v}">`)});form.classList.add('d-none');document.getElementById('plannerLoading').classList.remove('d-none')});
+  render();
+});
